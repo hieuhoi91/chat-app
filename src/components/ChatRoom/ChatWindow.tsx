@@ -1,8 +1,9 @@
-import { Avatar, Button, Form, Input, Tooltip } from 'antd';
-import React from 'react';
+import { Alert, AlertProps, Avatar, Button, Form, Input, Tooltip } from 'antd';
+import { useContext } from 'react';
 import styled from 'styled-components';
 import { UserAddOutlined } from '@ant-design/icons';
 import Message from './Message';
+import { AppContext } from '../Context/AppProvider';
 
 const HeaderStyled = styled.div`
   display: flex;
@@ -68,53 +69,71 @@ const MessagelistStyled = styled.div`
 `;
 
 const ChatWindow = () => {
+  const { selectedRoom, members, setIsInviteMemberVisible } =
+    useContext<any>(AppContext);
+
   return (
     <WrapperStyled>
-      <HeaderStyled>
-        <div className="header__info">
-          <p className="header__title">Room 1</p>
-          <span className="header__description">Day la room 1</span>
-        </div>
-        <ButtonGroupStyled>
-          <Button icon={<UserAddOutlined />} type="text">
-            Mời
-          </Button>
-          <Avatar.Group size="small" maxCount={2}>
-            <Tooltip title="A">
-              <Avatar>A</Avatar>
-            </Tooltip>
-            <Tooltip title="B">
-              <Avatar>B</Avatar>
-            </Tooltip>
-            <Tooltip title="C">
-              <Avatar>C</Avatar>
-            </Tooltip>
-            <Tooltip title="D">
-              <Avatar>D</Avatar>
-            </Tooltip>
-          </Avatar.Group>
-        </ButtonGroupStyled>
-      </HeaderStyled>
-      <ContentStyled>
-        <MessagelistStyled>
-          <Message
-            text="Text"
-            photoURL={null}
-            displayName="Hieu"
-            craeteAt={12312}
-          />
-        </MessagelistStyled>
-        <FormStyled>
-          <Form.Item>
-            <Input
-              placeholder="Nhập tin nhắn ..."
-              bordered={false}
-              autoComplete="off"
-            ></Input>
-          </Form.Item>
-          <Button type="primary">Gửi</Button>
-        </FormStyled>
-      </ContentStyled>
+      {selectedRoom.id ? (
+        <>
+          <HeaderStyled>
+            <div className="header__info">
+              <p className="header__title">{selectedRoom.name}</p>
+              <span className="header__description">
+                {selectedRoom.description}
+              </span>
+            </div>
+            <ButtonGroupStyled>
+              <Button
+                icon={<UserAddOutlined />}
+                type="text"
+                onClick={() => setIsInviteMemberVisible(true)}
+              >
+                Mời
+              </Button>
+              <Avatar.Group size="small" maxCount={2}>
+                {members.map((member: any) => (
+                  <Tooltip key={member.uid} title={member.displayName}>
+                    <Avatar src={member.photoURL}>
+                      {member.photoURL
+                        ? ''
+                        : member.displayName.charAt(0).toLowerCase()}
+                    </Avatar>
+                  </Tooltip>
+                ))}
+              </Avatar.Group>
+            </ButtonGroupStyled>
+          </HeaderStyled>
+          <ContentStyled>
+            <MessagelistStyled>
+              <Message
+                text="Text"
+                photoURL={null}
+                displayName="Hieu"
+                craeteAt={12312}
+              />
+            </MessagelistStyled>
+            <FormStyled>
+              <Form.Item>
+                <Input
+                  placeholder="Nhập tin nhắn ..."
+                  bordered={false}
+                  autoComplete="off"
+                ></Input>
+              </Form.Item>
+              <Button type="primary">Gửi</Button>
+            </FormStyled>
+          </ContentStyled>
+        </>
+      ) : (
+        <Alert
+          message="Hãy chọn phòng"
+          type="info"
+          showIcon
+          style={{ margin: 5 }}
+          closable
+        />
+      )}
     </WrapperStyled>
   );
 };

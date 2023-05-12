@@ -3,6 +3,7 @@ import { Row, Col, Button, Typography } from 'antd';
 import { signInWithPopup, FacebookAuthProvider } from 'firebase/auth';
 import { auth, db } from '../../firebase/config';
 import { addDoc, collection } from 'firebase/firestore';
+import { generateKeywords } from '../../firebase/services';
 
 const Login = () => {
   const fbProvider = new FacebookAuthProvider();
@@ -13,6 +14,8 @@ const Login = () => {
       name: user.displayName,
       email: user.email,
       providerId: providerId,
+      photoURL: user.photoURL,
+      keywords: generateKeywords(user.displayName?.toLowerCase()),
     });
   };
 

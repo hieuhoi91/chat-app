@@ -7,7 +7,7 @@ import { Spin } from 'antd';
 export const AuthContext = createContext({});
 
 interface PropsAuthProvider {
-  children: React.ReactElement;
+  children: JSX.Element | JSX.Element[];
 }
 
 const AuthProvider: FC<PropsAuthProvider> = props => {
@@ -21,7 +21,6 @@ const AuthProvider: FC<PropsAuthProvider> = props => {
         const { displayName, email, uid, photoURL } = user;
         setUser({ displayName, email, uid, photoURL });
         setIsLoading(false);
-        console.log(user);
         navigate('/');
       } else {
         setIsLoading(false);

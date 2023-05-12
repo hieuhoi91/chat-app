@@ -6,6 +6,7 @@ import { useEffect, useContext } from 'react';
 import { AuthContext } from '../Context/AuthProvider';
 import { IUser } from '../../types';
 import { collection, onSnapshot } from 'firebase/firestore';
+import { AppContext } from '../Context/AppProvider';
 
 const StyledUserInfo = styled.div`
   display: flex;
@@ -30,6 +31,7 @@ const UserInfo = () => {
 
   const user = useContext(AuthContext) as IUser;
   const { displayName, photoURL } = user;
+  const { clearState } = useContext<any>(AppContext);
 
   return (
     <StyledUserInfo>
@@ -39,7 +41,13 @@ const UserInfo = () => {
         </Avatar>
         <Typography.Text className="username">{displayName}</Typography.Text>
       </div>
-      <Button ghost onClick={() => signOut(auth)}>
+      <Button
+        ghost
+        onClick={() => {
+          clearState();
+          signOut(auth);
+        }}
+      >
         Đăng xuất
       </Button>
     </StyledUserInfo>

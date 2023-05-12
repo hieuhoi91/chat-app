@@ -3,7 +3,6 @@ import {
   query,
   where,
   orderBy,
-  limit,
   collection,
   onSnapshot,
 } from 'firebase/firestore';
@@ -12,7 +11,6 @@ import { IDocument } from '../types';
 
 const useFirestore = (collectionName: any, condition: any) => {
   const [documents, setDocuments] = useState<IDocument[]>([]);
-  console.log(documents);
 
   useEffect(() => {
     let collectionRef = collection(db, collectionName);
@@ -25,8 +23,7 @@ const useFirestore = (collectionName: any, condition: any) => {
       query(
         collectionRef,
         where(condition.fieldName, condition.operator, condition.compareValue),
-        orderBy('createdAt', 'desc'),
-        limit(2)
+        orderBy('createdAt', 'desc')
       );
     }
 

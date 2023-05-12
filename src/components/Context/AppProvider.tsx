@@ -6,12 +6,14 @@ import { IUser } from '../../types';
 
 export const AppContext = createContext({});
 
-interface PropsAuthProvider {
-  children: React.ReactElement;
+interface PropsAppProvider {
+  children: JSX.Element | JSX.Element[];
 }
 
-const AppProvider: FC<PropsAuthProvider> = props => {
+const AppProvider: FC<PropsAppProvider> = props => {
   const [isAddRoomVisible, setIsAddRoomVisible] = useState(false);
+  const [isInviteMemberVisible, setIsInviteMemberVisible] = useState(false);
+  const [selectedRoomId, setSelectedRoomId] = useState('');
 
   const user = useContext(AuthContext) as IUser;
   const { uid } = user;
@@ -25,8 +27,45 @@ const AppProvider: FC<PropsAuthProvider> = props => {
   }, [uid]);
 
   const rooms = useFirestore('rooms', roomsCondition);
+
+  const selectedRoom: any = useMemo(
+    () => rooms.find((room: any) => room.id === selectedRoomId) || {},
+    [rooms, selectedRoomId]
+  );
+
+  const usersCondition = useMemo(() => {
+    return {
+      fieldName: 'uid',
+      operator: 'in',
+      compareValue: selectedRoom.members,
+    };
+  }, [selectedRoom.members]);
+
+  const members = useFirestore('members', usersCondition);
+
+  const clearState = () => {
+    setSelectedRoomId('');
+    setIsAddRoomVisible(false);
+    setIsInviteMemberVisible(false);
+  };
+
   return (
-    <AppContext.Provider value={rooms}>{props.children}</AppContext.Provider>
+    <AppContext.Provider
+      value={{
+        rooms,
+        members,
+        selectedRoom,
+        isAddRoomVisible,
+        setIsAddRoomVisible,
+        selectedRoomId,
+        setSelectedRoomId,
+        isInviteMemberVisible,
+        setIsInviteMemberVisible,
+        clearState,
+      }}
+    >
+      {props.children}
+    </AppContext.Provider>
   );
 };
 
