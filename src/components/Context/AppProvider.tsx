@@ -29,7 +29,7 @@ const AppProvider: FC<PropsAppProvider> = props => {
   const rooms = useFirestore('rooms', roomsCondition);
 
   const selectedRoom: any = useMemo(
-    () => rooms.find((room: any) => room.id === selectedRoomId) || {},
+    () => rooms.find(room => room.id === selectedRoomId) || {},
     [rooms, selectedRoomId]
   );
 
@@ -41,7 +41,7 @@ const AppProvider: FC<PropsAppProvider> = props => {
     };
   }, [selectedRoom.members]);
 
-  const members = useFirestore('members', usersCondition);
+  const members = useFirestore('users', usersCondition);
 
   const clearState = () => {
     setSelectedRoomId('');

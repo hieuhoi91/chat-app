@@ -1,15 +1,14 @@
 import { Row, Col, Button, Typography } from 'antd';
 
 import { signInWithPopup, FacebookAuthProvider } from 'firebase/auth';
-import { auth, db } from '../../firebase/config';
-import { addDoc, collection } from 'firebase/firestore';
-import { generateKeywords } from '../../firebase/services';
+import { auth } from '../../firebase/config';
+import { addDocument, generateKeywords } from '../../firebase/services';
 
 const Login = () => {
   const fbProvider = new FacebookAuthProvider();
   const handleFbLogin = async () => {
     const { user, providerId } = await signInWithPopup(auth, fbProvider);
-    addDoc(collection(db, 'users'), {
+    addDocument('users', {
       uid: user.uid,
       name: user.displayName,
       email: user.email,

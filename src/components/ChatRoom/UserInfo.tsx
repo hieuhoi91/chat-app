@@ -1,11 +1,10 @@
 import { Avatar, Button, Typography } from 'antd';
 import styled from 'styled-components';
-import { auth, db } from '../../firebase/config';
+import { auth } from '../../firebase/config';
 import { signOut } from 'firebase/auth';
-import { useEffect, useContext } from 'react';
+import { useContext } from 'react';
 import { AuthContext } from '../Context/AuthProvider';
 import { IUser } from '../../types';
-import { collection, onSnapshot } from 'firebase/firestore';
 import { AppContext } from '../Context/AppProvider';
 
 const StyledUserInfo = styled.div`
@@ -21,14 +20,6 @@ const StyledUserInfo = styled.div`
 `;
 
 const UserInfo = () => {
-  useEffect(() => {
-    onSnapshot(collection(db, 'users'), {
-      next: snapshot => {
-        snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-      },
-    });
-  }, []);
-
   const user = useContext(AuthContext) as IUser;
   const { displayName, photoURL } = user;
   const { clearState } = useContext<any>(AppContext);

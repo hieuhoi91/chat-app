@@ -1,4 +1,5 @@
 import { Avatar, Typography } from 'antd';
+import { formatRelative } from 'date-fns';
 import { FC } from 'react';
 import styled from 'styled-components';
 
@@ -24,21 +25,33 @@ const WrapperStyled = styled.div`
 interface PropsMessage {
   text: string;
   displayName: string;
-  craeteAt: number;
+  createAt: any;
   photoURL: string | null;
 }
 
 const Message: FC<PropsMessage> = props => {
+  const formatDate = (seconds: number) => {
+    let formattedDate = '';
+    if (seconds) {
+      formattedDate = formatRelative(new Date(seconds * 1000), new Date());
+      formattedDate =
+        formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+    }
+    return formattedDate;
+  };
+
   return (
     <WrapperStyled>
       <div>
         <Avatar size="small" src={props.photoURL}>
-          A
+          {props.photoURL ? '' : props.displayName?.charAt(0)?.toUpperCase()}
         </Avatar>
         <Typography.Text className="author">
           {props.displayName}
         </Typography.Text>
-        <Typography.Text className="date">{props.craeteAt}</Typography.Text>
+        <Typography.Text className="date">
+          {formatDate(props.createAt.seconds)}
+        </Typography.Text>
       </div>
       <div>
         <Typography.Text className="content">{props.text}</Typography.Text>

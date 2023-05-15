@@ -4,6 +4,11 @@ export interface IUser {
   uid: string;
 }
 
+export interface IRoom {
+  id: string;
+  members: IUser[];
+}
+
 export interface IDocument {
   id: string;
 }
@@ -14,6 +19,7 @@ export interface IAddRoomVisible {
 }
 
 export interface IInviteMemberVisible {
+  selectedRoom: IRoom;
   isInviteMemberVisible: boolean;
   setIsInviteMemberVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }

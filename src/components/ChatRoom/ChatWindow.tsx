@@ -1,9 +1,12 @@
-import { Alert, AlertProps, Avatar, Button, Form, Input, Tooltip } from 'antd';
-import { useContext } from 'react';
+import { Alert, Avatar, Button, Form, Input, Tooltip } from 'antd';
+import { useContext, useState, ChangeEvent, useMemo } from 'react';
 import styled from 'styled-components';
 import { UserAddOutlined } from '@ant-design/icons';
 import Message from './Message';
 import { AppContext } from '../Context/AppProvider';
+import { addDocument } from '../../firebase/services';
+import { AuthContext } from '../Context/AuthProvider';
+import useFirestore from '../../hook/useFirestore';
 
 const HeaderStyled = styled.div`
   display: flex;
@@ -72,6 +75,40 @@ const ChatWindow = () => {
   const { selectedRoom, members, setIsInviteMemberVisible } =
     useContext<any>(AppContext);
 
+  const user = useContext<any>(AuthContext);
+  const { uid, photoURL, displayName } = user;
+
+  const [inputValue, setInputValue] = useState('');
+  const [form] = Form.useForm();
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleOnSubmit = () => {
+    addDocument('messages', {
+      text: inputValue,
+      uid,
+      photoURL,
+      displayName,
+      createAt: new Date(),
+      room: selectedRoom.id,
+    });
+    form.resetFields(['message']);
+  };
+
+  const condition = useMemo(
+    () => ({
+      fieldName: 'room',
+      operator: '==',
+      compareValue: selectedRoom.id,
+    }),
+    [selectedRoom.id]
+  );
+
+  const message = useFirestore('messages', condition);
+
+  console.log(message);
+
   return (
     <WrapperStyled>
       {selectedRoom.id ? (
@@ -97,7 +134,7 @@ const ChatWindow = () => {
                     <Avatar src={member.photoURL}>
                       {member.photoURL
                         ? ''
-                        : member.displayName.charAt(0).toLowerCase()}
+                        : member.name.charAt(0).toUpperCase()}
                     </Avatar>
                   </Tooltip>
                 ))}
@@ -106,22 +143,30 @@ const ChatWindow = () => {
           </HeaderStyled>
           <ContentStyled>
             <MessagelistStyled>
-              <Message
-                text="Text"
-                photoURL={null}
-                displayName="Hieu"
-                craeteAt={12312}
-              />
+              {message.map((mes: any) => (
+                <Message
+                  key={mes.id}
+                  text={mes.text}
+                  photoURL={mes.photoURL}
+                  displayName={mes.displayName}
+                  createAt={mes.createdAt}
+                />
+              ))}
             </MessagelistStyled>
-            <FormStyled>
-              <Form.Item>
+            <FormStyled form={form}>
+              <Form.Item name="message">
                 <Input
+                  onChange={handleInputChange}
+                  onPressEnter={handleOnSubmit}
                   placeholder="Nhập tin nhắn ..."
                   bordered={false}
                   autoComplete="off"
+                  value={inputValue}
                 ></Input>
               </Form.Item>
-              <Button type="primary">Gửi</Button>
+              <Button type="primary" onClick={handleOnSubmit}>
+                Gửi
+              </Button>
             </FormStyled>
           </ContentStyled>
         </>

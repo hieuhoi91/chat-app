@@ -4,16 +4,19 @@ import { AppContext } from '../Context/AppProvider';
 import { IInviteMemberVisible, IUser } from '../../types';
 import { addDocument } from '../../firebase/services';
 import { AuthContext } from '../Context/AuthProvider';
+import { debounce } from 'lodash';
 import {
   collection,
-  getDoc,
+  doc,
   getDocs,
   limit,
   orderBy,
   query,
+  updateDoc,
   where,
 } from 'firebase/firestore';
 import { db } from '../../firebase/config';
+import { log } from 'console';
 
 const DebounceSelect = ({
   fetchOptions,
@@ -22,7 +25,6 @@ const DebounceSelect = ({
 }: any) => {
   const [fetching, setFetching] = useState(false);
   const [options, setOptions] = useState([]);
-  console.log(options);
 
   const debounceFetcher = useMemo(() => {
     const loadOptions = (value: any) => {
@@ -35,14 +37,8 @@ const DebounceSelect = ({
       });
     };
 
-    const debounceTimer = setTimeout(() => {
-      loadOptions(props.value);
-    }, debounceTimeout);
-
-    return () => {
-      clearTimeout(debounceTimer);
-    };
-  }, [debounceTimeout, fetchOptions, props.curMembers, props.value]);
+    return debounce(loadOptions, debounceTimeout);
+  }, [debounceTimeout, fetchOptions, props.curMembers]);
 
   return (
     <Select
@@ -66,34 +62,30 @@ const DebounceSelect = ({
 
 const fetchUserList = async (search: string, curMembers: string) => {
   let collectionRef = collection(db, 'users');
-  const user = query(
+
+  const q = query(
     collectionRef,
-    where('keywords', 'array-contains', search),
-    orderBy('displayName'),
+    where('keywords', 'array-contains', search?.toLowerCase()),
+    orderBy('name'),
     limit(20)
   );
 
-  const querySnapshot = await getDocs(user);
-
-  console.log(querySnapshot.docs);
+  const querySnapshot = await getDocs(q);
 
   const result = querySnapshot.docs
-    .map((doc: any) => ({
-      label: doc.data().displayName,
+    .map(doc => ({
+      label: doc.data().name,
       value: doc.data().uid,
       photoURL: doc.data().photoURL,
     }))
-    .filter((opt: any) => !curMembers.includes(opt.value));
-
-  console.log(result);
+    .filter(opt => !curMembers.includes(opt.value));
 
   return result;
 };
 
 const InviteMemberModal = () => {
-  const { isInviteMemberVisible, setIsInviteMemberVisible } = useContext(
-    AppContext
-  ) as IInviteMemberVisible;
+  const { isInviteMemberVisible, setIsInviteMemberVisible, selectedRoom } =
+    useContext(AppContext) as IInviteMemberVisible;
 
   const user = useContext(AuthContext) as IUser;
   const { uid } = user;
@@ -104,6 +96,14 @@ const InviteMemberModal = () => {
   const handleOK = () => {
     addDocument('rooms', { ...form.getFieldsValue(), members: [uid] });
     form.resetFields();
+    //update members in current room
+
+    const roomRef = doc(db, 'rooms', selectedRoom.id);
+
+    updateDoc(roomRef, {
+      members: [...selectedRoom.members, ...value.map((val: any) => val.value)],
+    });
+
     setIsInviteMemberVisible(false);
   };
 
@@ -128,6 +128,7 @@ const InviteMemberModal = () => {
             fetchOptions={fetchUserList}
             onChange={(newValue: any) => setValue(newValue)}
             style={{ width: '100%' }}
+            curMembers={selectedRoom.members}
           />
         </Form>
       </Modal>
