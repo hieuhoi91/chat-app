@@ -16,7 +16,6 @@ import {
   where,
 } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { log } from 'console';
 
 const DebounceSelect = ({
   fetchOptions,
@@ -49,7 +48,7 @@ const DebounceSelect = ({
       {...props}
     >
       {options.map((opt: any) => (
-        <Select.Option key={opt.value} value={opt.value} title={opt.label}>
+        <Select.Option key={opt.value} value={opt.label} title={opt.label}>
           <Avatar src={opt.photoURL}>
             {opt.photoURL ? '' : opt.label?.charAt(0)?.toUpperCase()}
           </Avatar>

@@ -1,13 +1,15 @@
 import { Row, Col, Button, Typography } from 'antd';
 
-import { signInWithPopup, FacebookAuthProvider } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../../firebase/config';
 import { addDocument, generateKeywords } from '../../firebase/services';
 
 const Login = () => {
-  const fbProvider = new FacebookAuthProvider();
-  const handleFbLogin = async () => {
-    const { user, providerId } = await signInWithPopup(auth, fbProvider);
+  const googleProvider = new GoogleAuthProvider();
+
+  const handleGoogleLogin = async () => {
+    const { user, providerId } = await signInWithPopup(auth, googleProvider);
+
     addDocument('users', {
       uid: user.uid,
       name: user.displayName,
@@ -25,11 +27,11 @@ const Login = () => {
           <Typography.Title level={3} style={{ textAlign: 'center' }}>
             Chat App
           </Typography.Title>
-          <Button style={{ width: '100%', marginBottom: 5 }}>
+          <Button
+            onClick={handleGoogleLogin}
+            style={{ width: '100%', marginBottom: 5 }}
+          >
             Đăng nhập bằng Google
-          </Button>
-          <Button onClick={handleFbLogin} style={{ width: '100%' }}>
-            Đăng nhập bằng Facebook
           </Button>
         </Col>
       </Row>

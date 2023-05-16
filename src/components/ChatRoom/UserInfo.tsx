@@ -21,7 +21,9 @@ const StyledUserInfo = styled.div`
 
 const UserInfo = () => {
   const user = useContext(AuthContext) as IUser;
+
   const { displayName, photoURL } = user;
+
   const { clearState } = useContext<any>(AppContext);
 
   return (

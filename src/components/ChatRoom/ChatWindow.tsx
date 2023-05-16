@@ -107,8 +107,6 @@ const ChatWindow = () => {
 
   const message = useFirestore('messages', condition);
 
-  console.log(message);
-
   return (
     <WrapperStyled>
       {selectedRoom.id ? (
@@ -149,7 +147,7 @@ const ChatWindow = () => {
                   text={mes.text}
                   photoURL={mes.photoURL}
                   displayName={mes.displayName}
-                  createAt={mes.createdAt}
+                  createAt={mes.createAt}
                 />
               ))}
             </MessagelistStyled>
