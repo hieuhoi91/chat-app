@@ -1,5 +1,12 @@
 import { Alert, Avatar, Button, Form, Input, Tooltip } from 'antd';
-import { useContext, useState, ChangeEvent, useMemo } from 'react';
+import {
+  useContext,
+  useState,
+  ChangeEvent,
+  useMemo,
+  useRef,
+  useEffect,
+} from 'react';
 import styled from 'styled-components';
 import { UserAddOutlined } from '@ant-design/icons';
 import Message from './Message';
@@ -75,6 +82,9 @@ const ChatWindow = () => {
   const { selectedRoom, members, setIsInviteMemberVisible } =
     useContext<any>(AppContext);
 
+  const inputRef = useRef<any>(null);
+  const inputEndRef = useRef<HTMLDivElement>(null);
+
   const user = useContext<any>(AuthContext);
   const { uid, photoURL, displayName } = user;
 
@@ -85,6 +95,7 @@ const ChatWindow = () => {
   };
 
   const handleOnSubmit = () => {
+    if (inputValue.trim() === '' || inputValue === '\n') return;
     addDocument('messages', {
       text: inputValue,
       uid,
@@ -94,6 +105,7 @@ const ChatWindow = () => {
       room: selectedRoom.id,
     });
     form.resetFields(['message']);
+    setInputValue('');
   };
 
   const condition = useMemo(
@@ -106,6 +118,11 @@ const ChatWindow = () => {
   );
 
   const message = useFirestore('messages', condition);
+
+  useEffect(() => {
+    inputEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    inputRef.current?.focus();
+  }, [message]);
 
   return (
     <WrapperStyled>
@@ -150,10 +167,12 @@ const ChatWindow = () => {
                   createAt={mes.createAt}
                 />
               ))}
+              <div ref={inputEndRef}></div>
             </MessagelistStyled>
             <FormStyled form={form}>
               <Form.Item name="message">
                 <Input
+                  ref={inputRef}
                   onChange={handleInputChange}
                   onPressEnter={handleOnSubmit}
                   placeholder="Nhập tin nhắn ..."
